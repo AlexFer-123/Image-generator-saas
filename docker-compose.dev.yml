@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # MongoDB para desenvolvimento
+  mongo-dev:
+    image: mongo:7.0
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=ai-image-generator-dev
+    volumes:
+      - mongodb_dev_data:/data/db
+    restart: unless-stopped
+    networks:
+      - ai-image-dev-network
+
+  # MongoDB Express para desenvolvimento
+  mongo-express-dev:
+    image: mongo-express:1.0.0
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_SERVER=mongo-dev
+      - ME_CONFIG_MONGODB_PORT=27017
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=admin123
+    depends_on:
+      - mongo-dev
+    restart: unless-stopped
+    networks:
+      - ai-image-dev-network
+
+  # Redis para desenvolvimento
+  redis-dev:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    restart: unless-stopped
+    networks:
+      - ai-image-dev-network
+
+volumes:
+  mongodb_dev_data:
+  redis_dev_data:
+
+networks:
+  ai-image-dev-network:
+    driver: bridge
+
